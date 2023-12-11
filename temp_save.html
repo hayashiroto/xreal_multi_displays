@@ -1,0 +1,110 @@
+
+<!-- // 遠いけどいい感じに写ってくれるポートレート型-->
+    <a-video src="#display_video1" position="0 1.5 -3" rotation="0 0 0" width="6" height="4" id="display_video_wrapper1">
+    </a-video>
+    <a-video src="#display_video2" position="-9 1.5 -2.5" rotation="0 30 0" width="9" height="6" id="display_video_wrapper2">
+    </a-video>
+    <a-video src="#display_video3" position="9 1.5 -2.5" rotation="0 -30 0" width="9" height="6" id="display_video_wrapper3">
+    </a-video>
+    <a-video src="#display_video4" position="0 -3 -3" rotation="-30 0 0" width="6" height="4" id="display_video_wrapper4">
+
+<!-- // ポートレート型-->
+    <a-video src="#display_video1" position="0 1.5 -3" rotation="0 0 0" width="6" height="4" id="display_video_wrapper1">
+    </a-video>
+    <a-video src="#display_video2" position="-5.5 1.5 -2.5" rotation="0 40 0" width="4" height="6" id="display_video_wrapper2">
+    </a-video>
+    <a-video src="#display_video3" position="5.5 1.5 -2.5" rotation="0 -40 0" width="4" height="6" id="display_video_wrapper3">
+    </a-video>
+    <a-video src="#display_video4" position="0 -3 -3" rotation="-30 0 0" width="6" height="4" id="display_video_wrapper4">
+    </a-video>
+let now_x = 0;
+let now_y = 0;
+let lock = true;
+let track_settings = "";
+
+const cameraWrapper = document.getElementById("camera-wrapper");
+const camera = document.getElementById("camera");
+
+const hide_switch = document.getElementById("hide_switch");
+const fixedElm = document.getElementById("fixed");
+
+const videoElements = Array.from({ length: 6 }, (_, index) => document.getElementById(`display_video${index + 1}`));
+const displayVideoWrappers = Array.from({ length: 6 }, (_, index) => document.getElementById(`display_video_wrapper${index + 1}`));
+
+const startElems = Array.from({ length: 6 }, (_, index) => document.getElementById(`start${index + 1}`));
+const stopElems = Array.from({ length: 6 }, (_, index) => document.getElementById(`stop${index + 1}`));
+
+const startElemAr = document.getElementById("startAr");
+const stopElemAr = document.getElementById('stopAr');
+
+const resetCamera = document.getElementById("resetCamera");
+
+const displayMediaOptions = {
+  video: {
+    cursor: "always"
+  },
+  audio: false
+};
+
+resetCamera.addEventListener("click", recenterCamera, false);
+hide_switch.addEventListener("click", () => fixedElm.classList.toggle("hide"), false);
+
+startElems.forEach((startElem, index) => {
+    startElem.addEventListener("click", () => startCaptureObj(videoElements[index], displayVideoWrappers[index]), false);
+});
+
+startElemAr.addEventListener("click", () => {
+    startCaptureAr();
+    shortcut.add("Ctrl+C", recenterCamera);
+}, false);
+
+stopElemAr.addEventListener('click', () => {
+    cameraWrapper.setAttribute('rotation', { x: 0, y: 0, z: 0 });
+    shortcut.remove("Ctrl+B");
+});
+
+stopElems.forEach((stopElem, index) => {
+    stopElem.addEventListener("click", () => stopCapture(videoElements[index]), false);
+});
+
+async function startCaptureObj(video, display_video_wrapper) {
+    try {
+        video.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+    } catch (err) {
+        track_settings = "";
+        console.error(`Error: ${err}`);
+    }
+}
+
+function stopCapture(video) {
+    track_settings = "";
+    let tracks = video.srcObject.getTracks();
+    tracks.forEach((track) => track.stop());
+    video.srcObject = null;
+}
+
+async function startCaptureAr() {
+    try {
+        const ws = new WebSocket('wss://localhost:3000');
+        ws.onmessage = function(event) {
+            const euler = event.data.split(' ').map(Number);
+            const rotationPower = 3;
+            cameraWrapper.setAttribute('rotation', {
+                x: euler[0] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_x(),
+                y: euler[1] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_y(),
+            });
+        };
+        ws.onopen = () => console.log('WebSocket connection established');
+        ws.onerror = (error) => console.error('WebSocket error:', error);
+    } catch (err) {
+        console.error(`Error: ${err}`);
+    }
+}
+
+function recenterCamera(){
+    const cameraRotation = cameraWrapper.getAttribute("rotation");
+    const set_x = cameraRotation.x + delta_camera_vector.get_x();
+    const set_y = cameraRotation.y + delta_camera_vector.get_y();
+    const set_z = cameraRotation.z + delta_camera_vector.get_z();
+    delta_camera_vector.set_all(set_x, set_y, set_z);
+}
