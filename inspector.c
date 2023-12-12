@@ -36,7 +36,6 @@ typedef struct {
     double yaw, roll, pitch;
 } Euler;
 
-
 //  set up log
 void init_logging() {
     log_file = fopen("sensor_data_log.csv", "w");
@@ -64,12 +63,6 @@ Euler quaternionToEuler(Quaternion q) {
     double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
     e.yaw = atan2(sinr_cosp, cosr_cosp);
 
-    // ピッチ角（pitch）
-    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    e.pitch = atan2(siny_cosp, cosy_cosp);
-
-
     // roll角（roll）
     // ここがおかしい可能性がある。
     double sinp = 2 * (q.w * q.y - q.z * q.x);
@@ -78,11 +71,16 @@ Euler quaternionToEuler(Quaternion q) {
     else
         e.roll = asin(sinp);
 
+    // ピッチ角（pitch）
+    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+    e.pitch = atan2(siny_cosp, cosy_cosp);
+
     return e;
 }
 
 // ==============================================================================-
-// chat gpt が作成したズレ補正用コード
+// chat gpt が作成したズレ補正
 double correct_x(double x, int t) {
     double slope_x = 2.9411956051883347e-06;
     double intercept_x = -1.4262566775464364e-05;
@@ -136,7 +134,6 @@ static int parse_report(const unsigned char* buffer, int size, air_sample* out_s
         printf("Invalid packet size");
         return -1;
     }
-
     buffer += 5;
     out_sample->tick = *(buffer++) | (*(buffer++) << 8) | (*(buffer++) << 16) | (*(buffer++) << 24);
     buffer += 10;
@@ -177,8 +174,6 @@ static void update_rotation(float dt, vec3 ang_vel) {
 
     // クォータニオンの正規化（必要ならば）
     glm_quat_normalize(rotation);
-
-    /* printf("%f %f %f %f\n", rotation[0], rotation[1], rotation[2], rotation[3]); */
 
     // ミューテックスのアンロック
     pthread_mutex_unlock(&mutex);
@@ -247,8 +242,8 @@ int main(void) {
         double corrected_y = correct_y(e.pitch, t);
 
         /* printf("%f %f %f\n", e.yaw, e.pitch, e.roll); */
-        // pitch の値はいらない、あまりしない動きだし、ズレが補正できていない
-        printf("%f %f %f\n", corrected_x, corrected_y, e.roll);
+        // roll の値はいらない、あまりしない動きだし、ズレが補正できていない
+        printf("%f %f\n", corrected_x, corrected_y);
 
         t++;
     } while (res);

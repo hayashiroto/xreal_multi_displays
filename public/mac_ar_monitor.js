@@ -92,10 +92,10 @@ async function startCaptureAr() {
             // ARグラスのオイラーを取得
             const euler = event.data.split(' ').map(Number);
             const rotationPower = 3;
+            // z はroll だが、ズレが激しいため使用しない
             cameraWrapper.setAttribute('rotation', {
                 x: euler[0] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_x(),
                 y: euler[1] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_y(),
-                // z: euler[2] * (180 / Math.PI)
             });
         };
         ws.onopen = function() {
@@ -107,28 +107,6 @@ async function startCaptureAr() {
     } catch (err) {
         console.error(`Error: ${err}`);
     }
-}
-
-function quaternionToEuler(quat) {
-    // クォータニオンからオイラー角（yaw, pitch, roll）を計算
-    // この変換の実装は、クォータニオンの表現に依存します
-    // 以下は一般的な変換の例です
-    const [x, y, z, w] = quat;
-    const t0 = 2.0 * (w * x + y * z);
-    const t1 = 1.0 - 2.0 * (x * x + y * y);
-    const roll = Math.atan2(t0, t1);
-
-    let t2 = 2.0 * (w * y - z * x);
-    t2 = t2 > 1.0 ? 1.0 : t2;
-    t2 = t2 < -1.0 ? -1.0 : t2;
-    const pitch = Math.asin(t2);
-
-    const t3 = 2.0 * (w * z + x * y);
-    const t4 = 1.0 - 2.0 * (y * y + z * z);
-    const yaw = Math.atan2(t3, t4);
-
-
-    return { roll, pitch, yaw };
 }
 
 function stopCapture(evt) {
