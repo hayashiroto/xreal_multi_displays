@@ -122,13 +122,17 @@ static hid_device* open_device() {
 
 // 受信データから角速度を取り出す関数
 static void process_ang_vel(const int16_t ang_vel[3], vec3 out_vec) {
+    float revise_value_1 = 20;
+    float revise_value_2 = 0.001f;
+    float revise_value_3 = 0.0128f;
     // 角速度のスケールとバイアスの補正（経験的な補正）
-    out_vec[0] = (float)(ang_vel[0] + 20) * -0.001f;
-    out_vec[1] = (float)(ang_vel[1] + 20) * 0.001f - 0.0128f;
-    out_vec[2] = (float)(ang_vel[2] - 20) * 0.001f + 0.0128f;
+    out_vec[0] = (float)(ang_vel[0] + revise_value_1) * -revise_value_2;
+    out_vec[1] = (float)(ang_vel[1] + revise_value_1) * revise_value_2 - revise_value_3;
+    out_vec[2] = (float)(ang_vel[2] - revise_value_1) * revise_value_2 + revise_value_3;
 }
 
 // HIDデバイスからのレポートを解析する関数
+// ここは触らないこと
 static int parse_report(const unsigned char* buffer, int size, air_sample* out_sample) {
     if (size != 64) {
         printf("Invalid packet size");

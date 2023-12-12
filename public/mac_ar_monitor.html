@@ -28,16 +28,11 @@
     #fixed.hide #output {
       width: 0;
     }
-
-    #face_video {
-      position: absolute;
-      z-index: -1;
-    }
   </style>
 </head>
 
 <body>
-  <a-scene>
+  <a-scene stats loading-screen="dotsColor: gray; backgroundColor: lightgray">
     <a-assets>
       <video id="display_video1" loop="true" autoplay></video>
       <video id="display_video2" loop="true" autoplay></video>

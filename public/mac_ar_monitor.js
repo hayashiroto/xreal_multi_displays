@@ -91,7 +91,7 @@ async function startCaptureAr() {
         ws.onmessage = function(event) {
             // ARグラスのオイラーを取得
             const euler = event.data.split(' ').map(Number);
-            const rotationPower = 3;
+            const rotationPower = 1;
             // z はroll だが、ズレが激しいため使用しない
             cameraWrapper.setAttribute('rotation', {
                 x: euler[0] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_x(),
