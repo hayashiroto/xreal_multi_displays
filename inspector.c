@@ -81,22 +81,22 @@ Euler quaternionToEuler(Quaternion q) {
 
 // ==============================================================================-
 // chat gpt が作成したズレ補正
-double correct_x(double x, int t) {
-    double slope_x = 2.9411956051883347e-06;
-    double intercept_x = -1.4262566775464364e-05;
-    return x - (slope_x * t + intercept_x);
+double correct_x(double x, int time) {
+    double slope_x = 2.7844314384448794e-06;
+    double intercept_x = 0.005475996600520876;
+    return x - ((slope_x * time) + intercept_x);
 }
 
-double correct_y(double y, int t) {
-    double slope_y = 2.774111033752069e-06;
-    double intercept_y = -0.00018742022783452966;
-    return y - (slope_y * t + intercept_y);
+double correct_y(double y, int time) {
+    double slope_y = 1.1515310660378967e-05;
+    double intercept_y = 0.024977250437542786;
+    return y - ((slope_y * time) + intercept_y);
 }
 
-double correct_z(double z, int t) {
-    double slope_z = -6.291870176079983e-07;
-    double intercept_z = 0.014845147509020225;
-    return z - (slope_z * t + intercept_z);
+double correct_z(double z, int time) {
+    double slope_z = 2.1609957221874008e-07;
+    double intercept_z = 0.024907370105649217;
+    return z - ((slope_z * time) + intercept_z);
 }
 
 // ==============================================================================-
@@ -122,13 +122,13 @@ static hid_device* open_device() {
 
 // 受信データから角速度を取り出す関数
 static void process_ang_vel(const int16_t ang_vel[3], vec3 out_vec) {
+
     float revise_value_1 = 20;
     float revise_value_2 = 0.001f;
-    float revise_value_3 = 0.0128f;
     // 角速度のスケールとバイアスの補正（経験的な補正）
     out_vec[0] = (float)(ang_vel[0] + revise_value_1) * -revise_value_2;
-    out_vec[1] = (float)(ang_vel[1] + revise_value_1) * revise_value_2 - revise_value_3;
-    out_vec[2] = (float)(ang_vel[2] - revise_value_1) * revise_value_2 + revise_value_3;
+    out_vec[1] = (float)(ang_vel[1] + revise_value_1) * revise_value_2;
+    out_vec[2] = (float)(ang_vel[2] - revise_value_1) * revise_value_2;
 }
 
 // HIDデバイスからのレポートを解析する関数
@@ -151,7 +151,7 @@ static int parse_report(const unsigned char* buffer, int size, air_sample* out_s
 }
 
 // カメラの回転を更新する関数
-static void update_rotation(float dt, vec3 ang_vel) {
+static void update_rotation(float dt, vec3 ang_vel, int time) {
     // ミューテックスのロック
     pthread_mutex_lock(&mutex);
 
@@ -168,12 +168,20 @@ static void update_rotation(float dt, vec3 ang_vel) {
         // 回転軸と回転角度から回転を表すクォータニオンを作成
         versor delta_rotation;
         glm_quatv(delta_rotation, rot_angle, rot_axis);
-
         // ここの出力をunity側がキャプチャする
         /* printf("%f %f %f %f\n", delta_rotation[0], delta_rotation[1], delta_rotation[2], delta_rotation[3]); */
 
+        // Three.js だと、ここの値が異なってくるので補正
+        printf("%f %f %f %f\n", delta_rotation[0], delta_rotation[2], delta_rotation[1], delta_rotation[3]);
+
         // 既存の回転に新しい回転を合成
         glm_quat_mul(rotation, delta_rotation, rotation);
+
+        // ズレの補正
+        /* double corrected_x = correct_x(rotation[0], time); */
+        /* double corrected_y = correct_y(rotation[1], time); */
+        /* double corrected_z = correct_z(rotation[2], time); */
+
     }
 
     // クォータニオンの正規化（必要ならば）
@@ -230,24 +238,7 @@ int main(void) {
 
         // カメラの回転を更新
         /* process_sensor_data(sample.ang_vel, ang_vel); */
-        update_rotation(dt, ang_vel);
-        log_data(sample.ang_vel, rotation);
-
-        // 例のクォータニオン
-        Quaternion q = {rotation[0], rotation[1], rotation[2], rotation[3]}; 
-        // サンプルインデックス
-        int sampleIndex = 0;
-
-        // オイラー角への変換
-        Euler e = quaternionToEuler(q);
-
-        // ズレの補正
-        double corrected_x = correct_x(e.yaw, t);
-        double corrected_y = correct_y(e.pitch, t);
-
-        /* printf("%f %f %f\n", e.yaw, e.pitch, e.roll); */
-        // roll の値はいらない、あまりしない動きだし、ズレが補正できていない
-        printf("%f %f\n", corrected_x, corrected_y);
+        update_rotation(dt, ang_vel, t);
 
         t++;
     } while (res);

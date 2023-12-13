@@ -24,7 +24,6 @@ const videoElements = Array.from({ length: repeatNum }, (_, index) => document.g
 
 const displayVideoWrappers = Array.from({ length: repeatNum }, (_, index) => document.getElementById(`display_video_wrapper${index + 1}`));
 
-
 // オブジェクトのインスタンスを作成
 // カメラの補正べクトル
 let delta_camera_vector = new vector_3d(0, 0, 0);
@@ -55,7 +54,6 @@ hide_switch.addEventListener("click", function (evt) {
   fixedElm.classList.toggle("hide");
 }, false);
 
-
 startElemAr.addEventListener("click", function(evt) {
     startCaptureAr();
     shortcut.add("Ctrl+C",function() {
@@ -85,17 +83,41 @@ function stopCapture(video) {
   video.srcObject = null;
 }
 
+// 時間に応じたオイラー角の補正を行う関数
+function correctEulerAngle(timeIndex) {
+    // 線形回帰モデルの係数と切片
+    const coefX = -0.00025196150248418597;
+    const interceptX = -0.5307014652593463;
+    const coefZ = 0.00047521015315345227;
+    const interceptZ = -2.8541054664442433;
+    // 補正されたオイラー角を計算
+    const correctedX = coefX * timeIndex + interceptX;
+    const correctedZ = coefZ * timeIndex + interceptZ;
+
+    return { correctedX, correctedZ };
+}
+
 async function startCaptureAr() {
     try {
         const ws = new WebSocket('wss://localhost:3000');
         ws.onmessage = function(event) {
-            // ARグラスのオイラーを取得
-            const euler = event.data.split(' ').map(Number);
-            const rotationPower = 1;
-            // z はroll だが、ズレが激しいため使用しない
+            // ARクォータニオンデータを受信
+            const quaternion_ar = event.data.split(' ').map(Number);
+            // cameraのクォータニオンを取得
+            const quaternion_camera = convertEulerToQuaternion(cameraWrapper);
+            // 合成
+            // クォータニオンからオイラー角への変換
+            const combinedQuaternions = combineQuaternions(quaternion_ar, quaternion_camera);
+            const combinedEuler = convertQuaternionToEuler(combinedQuaternions);
+
+            // cameraWrapperのrotationを更新
             cameraWrapper.setAttribute('rotation', {
-                x: euler[0] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_x(),
-                y: euler[1] * (180 / Math.PI) * rotationPower - delta_camera_vector.get_y(),
+                x: combinedEuler.x,
+                y: combinedEuler.y,
+                z: combinedEuler.z
+                // ズレ補正ができたらリセット処理を反映させる
+                //  - delta_camera_vector.get_x()
+                //  - delta_camera_vector.get_y()
             });
         };
         ws.onopen = function() {
@@ -107,6 +129,53 @@ async function startCaptureAr() {
     } catch (err) {
         console.error(`Error: ${err}`);
     }
+}
+
+function convertEulerToQuaternion(cameraWrapper) {
+    // cameraWrapperのオイラー角を取得
+    const euler = cameraWrapper.getAttribute('rotation');
+
+    // Three.jsのEulerオブジェクトを作成（角度は度からラジアンに変換）
+    const threeEuler = new THREE.Euler(
+        euler.x * Math.PI / 180, 
+        euler.y * Math.PI / 180, 
+        euler.z * Math.PI / 180, 
+        'XYZ'  // 回転順序（デフォルトはXYZ）
+    );
+
+    // EulerオブジェクトからQuaternionオブジェクトへ変換
+    const quaternion = new THREE.Quaternion().setFromEuler(threeEuler);
+
+    // クォータニオンの各成分を配列として返す
+    return [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
+}
+
+function combineQuaternions(quaternion1, quaternion2) {
+    // Three.jsのQuaternionオブジェクトを作成
+    const threeQuaternion1 = new THREE.Quaternion(quaternion1[0], quaternion1[1], quaternion1[2], quaternion1[3]);
+    const threeQuaternion2 = new THREE.Quaternion(quaternion2[0], quaternion2[1], quaternion2[2], quaternion2[3]);
+
+    // 二つのクォータニオンを合成（乗算）
+    threeQuaternion1.multiply(threeQuaternion2);
+
+    // 合成されたクォータニオンを配列として返す
+    return [threeQuaternion1.x, threeQuaternion1.y, threeQuaternion1.z, threeQuaternion1.w];
+}
+
+function convertQuaternionToEuler(quaternion) {
+
+    // Three.jsのQuaternionオブジェクトを作成
+    const threeQuaternion = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+
+    // QuaternionからEulerへ変換
+    const euler = new THREE.Euler().setFromQuaternion(threeQuaternion, 'XYZ');
+
+    // オイラー角をラジアンから度に変換
+    return {
+        x: euler.x * (180 / Math.PI),
+        y: euler.y * (180 / Math.PI),
+        z: euler.z * (180 / Math.PI)
+    };
 }
 
 function stopCapture(evt) {
