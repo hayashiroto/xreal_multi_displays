@@ -83,26 +83,19 @@ function stopCapture(video) {
   video.srcObject = null;
 }
 
-// 時間に応じたオイラー角の補正を行う関数
-function correctEulerAngle(timeIndex) {
-    // 線形回帰モデルの係数と切片
-    const coefX = -0.00025196150248418597;
-    const interceptX = -0.5307014652593463;
-    const coefZ = 0.00047521015315345227;
-    const interceptZ = -2.8541054664442433;
-    // 補正されたオイラー角を計算
-    const correctedX = coefX * timeIndex + interceptX;
-    const correctedZ = coefZ * timeIndex + interceptZ;
-
-    return { correctedX, correctedZ };
-}
-
 async function startCaptureAr() {
+    let index = 0;
     try {
         const ws = new WebSocket('wss://localhost:3000');
         ws.onmessage = function(event) {
             // ARクォータニオンデータを受信
-            const quaternion_ar = event.data.split(' ').map(Number);
+            let quaternion_ar = event.data.split(' ').map(Number);
+            // ハイパスフィルターを行う
+            if (highPassFilter(quaternion_ar))
+            {
+                console.log('処理をスキップしました');
+                quaternion_ar = [0,0,0,1];
+            }
             // cameraのクォータニオンを取得
             const quaternion_camera = convertEulerToQuaternion(cameraWrapper);
             // 合成
@@ -112,13 +105,12 @@ async function startCaptureAr() {
 
             // cameraWrapperのrotationを更新
             cameraWrapper.setAttribute('rotation', {
-                x: combinedEuler.x,
-                y: combinedEuler.y,
-                z: combinedEuler.z
-                // ズレ補正ができたらリセット処理を反映させる
-                //  - delta_camera_vector.get_x()
-                //  - delta_camera_vector.get_y()
+                // ctrl + c でリセット
+                x: combinedEuler.x - delta_camera_vector.get_x(),
+                y: combinedEuler.y - delta_camera_vector.get_y(),
+                // z roll はズレが大きすぎるので割愛
             });
+            index += 1;
         };
         ws.onopen = function() {
             console.log('WebSocket connection established');
@@ -129,6 +121,19 @@ async function startCaptureAr() {
     } catch (err) {
         console.error(`Error: ${err}`);
     }
+}
+
+// chat gpt が算出した補正
+// クォータニオンの変化量が小さい場合に処理をスキップする関数
+function highPassFilter(newQuaternion) {
+    // 経験的補正
+    const threshold = 0.00002;
+    const changeX = Math.abs(newQuaternion[0]);
+    const changeY = Math.abs(newQuaternion[1]);
+    const changeZ = Math.abs(newQuaternion[2]);
+    const changeW = Math.abs(newQuaternion[3]);
+
+    return changeX < threshold && changeY < threshold && changeZ < threshold;
 }
 
 function convertEulerToQuaternion(cameraWrapper) {
