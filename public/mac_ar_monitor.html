@@ -6,9 +6,6 @@
 <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 <script src="library/shortcut.js"></script>
 <script src="library/aframe-gui.js"></script>
-<script src="class_script/vector_3d.js"></script>
-<script src="mac_ar_monitor.js"></script>
-<script src="gui_action.js"></script>
   <style>
     #fixed {
       position: fixed;
@@ -46,8 +43,6 @@
       <video id="display_video6" loop="true" autoplay></video>
     </a-assets>
 
-    <!--     position="-5.5 1.5 -2.5" --> 
-    <!--     rotation="0 40 0" --> 
     <a-gui-flex-container
         flex-direction="column" justify-content="center" align-items="normal" component-padding="0.1"
         opacity="0.5" width="3.5" height="6" panel-color="#000" panel-rounded="0.1"
@@ -56,16 +51,17 @@
 
             <a-gui-radio
                 width="2.5" height="0.75"
-                onclick="testToggleAction"
+                onclick="testToggleActionSix"
                 value="6 monitor"
                 font-size="0.3"
                 margin="0 0 0.05 0"
+                id="toggleActionSix"
                 >
                 </a-gui-radio>
 
             <a-gui-radio
                 width="2.5" height="0.75"
-                onclick="testToggleAction"
+                onclick="testToggleActionMine"
                 value="my style"
                 font-size="0.3"
                 margin="0 0 0.05 0"
@@ -74,8 +70,8 @@
 
             <a-gui-toggle
                 width="2.5" height="0.75"
-                onclick="testToggleAction"
-                value="toggle label"
+                onclick="testToggleActionRotation"
+                value="Rotation Zero"
                 font-family="assets/fonts/Plaster-Regular.ttf"
                 font-size="0.2"
                 margin="0 0 0.05 0"
@@ -92,37 +88,34 @@
     </a-gui-flex-container>
 
 
-	<a-plane
-		id = "video-border"
-		width = "6.4" height = "4.4"
+	<!-- <a-plane -->
+	<!-- 	id = "video-border" -->
+	<!-- 	width = "6.4" height = "4.4" -->
+        <!-- position="0 1.5 -3" --> 
+        <!-- rotation="0 0 0" --> 
+	<!-- 	color = "#000000" -->
+	<!-- 	video-controls> -->		
+        <!-- <a-video -->
+            <!-- src="#display_video1" --> 
+            <!-- width="6" height="4" --> 
+	<!-- 		position="0 0 0.1" -->
+            <!-- rotation="0 0 0" --> 
+            <!-- id="display_video_wrapper1"></a-video> -->
+    <!-- </a-plane> -->
+    <a-video
+        src="#display_video1" 
+        width="6" height="4" 
         position="0 1.5 -3" 
         rotation="0 0 0" 
-		color = "#440000"
-		video-controls>		
-        <a-video
-            src="#display_video1" 
-            width="6" height="4" 
-			position="0 0 0.1"
-            rotation="0 0 0" 
-            id="display_video_wrapper1"></a-video>
-    </a-plane>
+        id="display_video_wrapper1"></a-video>
 
-	<a-plane
-		width="80" height="60"
-		position=" 0.00 0.00 0.00" 
-		rotation="0 0 0" 
-		color="#888887" 
-		material="src: #grid; repeat:100 100; transparent: true; opacity: 0.75"
-		shadow="cast: false; receive: true">
-	</a-plane>
-
-    <!-- <a-video --> 
-    <!--     src="#display_video2" --> 
-    <!--     position="-5.5 1.5 -2.5" --> 
-    <!--     rotation="0 40 0" --> 
-    <!--     width="4" --> 
-    <!--     height="6" --> 
-    <!--     id="display_video_wrapper2"></a-video> -->
+    <a-video 
+        src="#display_video2" 
+        position="-5.5 1.5 -2.5" 
+        rotation="0 40 0" 
+        width="4" 
+        height="6" 
+        id="display_video_wrapper2"></a-video>
 
     <a-video 
         src="#display_video3" 
@@ -189,6 +182,9 @@
     <p><button id="hide_switch">縮小/拡大</button></p>
   </div>
 
+<script src="class_script/vector_3d.js"></script>
+<script src="mac_ar_monitor.js"></script>
+<script src="gui_action.js"></script>
 
 </body>
 
