@@ -1,17 +1,21 @@
+ // 移動にかかる時間（ミリ秒）
+var duration = 600;
 // 元の位置を保存するためのオブジェクト
-var duration = 1000; // 移動にかかる時間（ミリ秒）
 var originalPositions = {};
 var originalRotations = {};
 var six_sub_display = ['display_video_wrapper2', 'display_video_wrapper3', 'display_video_wrapper5', 'display_video_wrapper6'];
+// シーンがロードされたらtemp_functionを実行
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('a-scene').addEventListener('loaded', saveOriginalPositionsAndRotations);
+});
 
+// エンティテぃのロード完了後に実行される処理
 // 各ビデオラッパーの元の位置を保存する関数
 function saveOriginalPositionsAndRotations() {
     console.log("=== Saving Original Positions and Rotations ===");
     six_sub_display.forEach(function(id) {
         var element = document.getElementById(id);
         var position = element.getAttribute('position');
-        console.log(id)
-        console.log(position)
         var rotation = element.getAttribute('rotation');
         originalPositions[id] = { x: position.x, y: position.y, z: position.z };
         originalRotations[id] = { x: rotation.x, y: rotation.y, z: rotation.z };
@@ -73,23 +77,18 @@ function resetRotation() {
 window.testToggleActionRotation = function() {
     // zeroRotation();
     console.log("Clicked GUI - Zero Rotation");
-    saveOriginalPositionsAndRotations()
 }
 
+// 6面2面モニタの切り替え
 window.testToggleActionSix = function() {
     var guiRadio = document.getElementById('toggleActionSix');
-    var isChecked = guiRadio.getAttribute('checked') === 'true'; // 文字列から論理値への変換
-    console.log("Radio state: ", isChecked);
-
+    // 文字列から論理値への変換
+    var isChecked = guiRadio.getAttribute('checked') === 'true';
     if (isChecked) {
-        console.log('Storing');
         moveMine();
     } else {
-        console.log('Expanding');
         resetPosition();
     }
-
-    console.log("Clicked Six");
     guiRadio.setAttribute('checked', !isChecked);
 }
 

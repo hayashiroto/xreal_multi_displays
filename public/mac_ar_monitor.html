@@ -45,8 +45,9 @@
 
     <a-gui-flex-container
         flex-direction="column" justify-content="center" align-items="normal" component-padding="0.1"
-        opacity="0.5" width="3.5" height="6" panel-color="#000" panel-rounded="0.1"
-        position="-5.5 1.5 -2.5" rotation="0 40 0"
+        opacity="0.5" width="3.5" height="2" panel-color="#DDD" panel-rounded="0.1"
+        position="-11 -5.5 -4.5" 
+        rotation="0 40 0" 
         >
 
             <a-gui-radio
@@ -68,23 +69,23 @@
                 >
                 </a-gui-radio>
 
-            <a-gui-toggle
-                width="2.5" height="0.75"
-                onclick="testToggleActionRotation"
-                value="Rotation Zero"
-                font-family="assets/fonts/Plaster-Regular.ttf"
-                font-size="0.2"
-                margin="0 0 0.05 0"
-                >
-                </a-gui-toggle>
+            <!-- <a-gui-toggle -->
+            <!--     width="2.5" height="0.75" -->
+            <!--     onclick="testToggleActionRotation" -->
+            <!--     value="Rotation Zero" -->
+            <!--     font-family="assets/fonts/Plaster-Regular.ttf" -->
+            <!--     font-size="0.2" -->
+            <!--     margin="0 0 0.05 0" -->
+            <!--     > -->
+            <!--     </a-gui-toggle> -->
 
-            <a-gui-slider
-                width="2.5" height="0.75"
-                onclick="testSliderAction"
-                percent="0.29"
-                margin="0 0 0.05 0"
-                >
-                </a-gui-slider>
+            <!-- <a-gui-slider -->
+            <!--     width="2.5" height="0.75" -->
+            <!--     onclick="testSliderAction" -->
+            <!--     percent="0.29" -->
+            <!--     margin="0 0 0.05 0" -->
+            <!--     > -->
+            <!--     </a-gui-slider> -->
     </a-gui-flex-container>
 
 
@@ -158,6 +159,7 @@
         <a-entity 
             camera 
             rotation-reader 
+            fov="80"
             id="camera" 
             position="0 1.5 0" 
             wasd-controls>
