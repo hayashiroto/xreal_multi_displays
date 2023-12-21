@@ -149,15 +149,24 @@
         id="display_video_wrapper6"></a-video>
 
 
-    <!-- <a-sky color="#000000"></a-sky> -->
+<!-- <a-sky color="#000000"></a-sky> -->
     <a-sky ></a-sky>
 
     <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: [gui-interactable]"></a-entity>
 
     <a-entity id="camera-wrapper">
-      <a-entity camera rotation-reader id="camera" position="0 1.5 0" look-controls wasd-controls></a-entity>
+        <a-entity 
+            camera 
+            rotation-reader 
+            id="camera" 
+            position="0 1.5 0" 
+            wasd-controls>
+            <!-- ipadで作業する時はこちらの方がいい、こちらに追加するか、こちらのものをコメントアウトgとぐるする形で -->
+            <!-- look-controls --> 
+<script src="library/drag_mouse.js"></script>
+        </a-entity>
     </a-entity>
-  </a-scene>
+    </a-scene>
 
   <div id="fixed">
     <p><button id="resetCamera">resetCamera</button>&nbsp;<button id="lockCamera">lockCamera</button></p>
