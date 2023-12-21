@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>AR_MAC_MONITOR</title>
-<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="library/shortcut.js"></script>
 <script src="library/aframe-gui.js"></script>
   <style>
@@ -47,11 +47,11 @@
         flex-direction="column" justify-content="center" align-items="normal" component-padding="0.1"
         opacity="0.5" width="3.5" height="2" panel-color="#DDD" panel-rounded="0.1"
         position="-11 -5.5 -4.5" 
-        rotation="0 40 0" 
+        rotation="0 45 0" 
         >
 
             <a-gui-radio
-                width="2.5" height="0.75"
+                width="1.5" height="0.75"
                 onclick="testToggleActionSix"
                 value="6 monitor"
                 font-size="0.3"
@@ -61,7 +61,7 @@
                 </a-gui-radio>
 
             <a-gui-radio
-                width="2.5" height="0.75"
+                width="1.5" height="0.75"
                 onclick="testToggleActionMine"
                 value="my style"
                 font-size="0.3"
@@ -79,13 +79,13 @@
             <!--     > -->
             <!--     </a-gui-toggle> -->
 
-            <!-- <a-gui-slider -->
-            <!--     width="2.5" height="0.75" -->
-            <!--     onclick="testSliderAction" -->
-            <!--     percent="0.29" -->
-            <!--     margin="0 0 0.05 0" -->
-            <!--     > -->
-            <!--     </a-gui-slider> -->
+            <a-gui-slider
+                width="2.5" height="0.75"
+                onclick="testSliderAction"
+                percent="0.29"
+                margin="0 0 0.05 0"
+                >
+                </a-gui-slider>
     </a-gui-flex-container>
 
 
@@ -113,7 +113,7 @@
     <a-video 
         src="#display_video2" 
         position="-5.5 1.5 -2.5" 
-        rotation="0 40 0" 
+        rotation="0 45 0" 
         width="4" 
         height="6" 
         id="display_video_wrapper2"></a-video>
@@ -121,7 +121,7 @@
     <a-video 
         src="#display_video3" 
         position="5.5 1.5 -2.5" 
-        rotation="0 -40 0" width="4" 
+        rotation="0 -45 0" width="4" 
         height="6" 
         id="display_video_wrapper3"></a-video>
 
@@ -135,16 +135,16 @@
 
     <a-video 
         src="#display_video5" 
-        position="-3 6.6 -2.5" 
-        rotation="30 40 0" 
+        position="-5 1.5 2.5" 
+        rotation="0 90 0" 
         width="6" 
         height="4" 
         id="display_video_wrapper5"></a-video>
 
     <a-video 
         src="#display_video6" 
-        position="3 6.6 -2.5" 
-        rotation="30 -40 0" 
+        position="5 1.5 2.5"" 
+        rotation="0 -90 0" 
         width="6" 
         height="4" 
         id="display_video_wrapper6"></a-video>
@@ -155,19 +155,22 @@
 
     <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: [gui-interactable]"></a-entity>
 
-    <a-entity id="camera-wrapper">
-        <a-entity 
-            camera 
-            rotation-reader 
-            fov="80"
-            id="camera" 
-            position="0 1.5 0" 
-            wasd-controls>
-            <!-- ipadで作業する時はこちらの方がいい、こちらに追加するか、こちらのものをコメントアウトgとぐるする形で -->
-            <!-- look-controls --> 
-<script src="library/drag_mouse.js"></script>
-        </a-entity>
-    </a-entity>
+    <a-camera projection="orthographic"><a-camera>
+
+    <!-- <a-entity id="camera-wrapper"> -->
+    <!--     <a-entity --> 
+    <!--         camera --> 
+    <!--         rotation-reader --> 
+    <!--         projection="orthographic" -->
+    <!--         fov="80" -->
+    <!--         id="camera" --> 
+    <!--         position="0 1.5 0" --> 
+    <!--         look-controls --> 
+    <!--         wasd-controls> -->
+    <!--         <!-1- ipadで作業する時はこちらの方がいい、こちらに追加するか、こちらのものをコメントアウトgとぐるする形で -1-> -->
+<!-- <!-1- <script src="library/drag_mouse.js"></script> -1-> -->
+    <!--     </a-entity> -->
+    <!-- </a-entity> -->
     </a-scene>
 
   <div id="fixed">
@@ -196,6 +199,7 @@
 <script src="class_script/vector_3d.js"></script>
 <script src="mac_ar_monitor.js"></script>
 <script src="gui_action.js"></script>
+
 
 </body>
 
